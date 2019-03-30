@@ -5,6 +5,7 @@ from random import shuffle
 from pygame.locals import *
 ## Constants ##
 # colors
+WHITE     = (255, 255, 255)
 RED       = (255,   0,   0)
 GREEN     = (  0, 255,   0)
 BLUE      = (  0,   0, 255)
@@ -60,10 +61,10 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(self.color)
     def checkForSide(self):
         if self.rect.right > DISPLAYWIDTH:
-            self.rect.right = DISPLAYWIDTH
+            self.rect.left = 0
             self.vectorx = 0
         elif self.rect.left < 0:
-            self.rect.left = 0
+            self.rect.right = DISPLAYWIDTH
             self.vectorx = 0
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, rect, color, vectory, speed):
@@ -146,25 +147,26 @@ class App(object):
         self.beginGame = False
         self.laserSound = pygame.mixer.Sound('laser.ogg')
         self.startLaser = pygame.mixer.Sound('alienLaser.ogg')
+        self.oof = pygame.mixer.Sound('oof.ogg')
         self.playIntroSound = True
     def resetGame(self):
         self.gameStart = True
         self.gameOver = False
         self.gameWin = False
         self.needToMakeEnemies = True
-        self.introMessage1 = Text('orena.ttf', 25, 
-                                  'Welcome to Space Invaders!',
+        self.introMessage1 = Text('KS.ttf', 60, 
+                                  'Space Invaders!',
+                                  PURPLE, self.displayRect, self.displaySurf)
+        self.introMessage2 = Text('OpenSans.ttf', 16,
+                                  '--- Press Any Key to Continue ---',
                                   GREEN, self.displayRect, self.displaySurf)
-        self.introMessage2 = Text('orena.ttf', 20,
-                                  'Press Any Key to Continue',
-                                  GREEN, self.displayRect, self.displaySurf)
-        self.introMessage2.rect.top = self.introMessage1.rect.bottom + 5
-        self.gameOverMessage = Text('orena.ttf', 25,
-                                    'GAME OVER',
+        self.introMessage2.rect.top = self.introMessage1.rect.bottom + 25
+        self.gameOverMessage = Text('OpenSans.ttf', 40,
+                                    'OOF',
                                     GREEN, self.displayRect, self.displaySurf)
-        self.gameWinMessage = Text('orena.ttf', 25,
+        self.gameWinMessage = Text('OpenSans.ttf', 40,
                                     'YOU ARE THE CHAMPION',
-                                    GREEN, self.displayRect, self.displaySurf)
+                                    WHITE, self.displayRect, self.displaySurf)
         self.player = self.makePlayer()
         self.bullets = pygame.sprite.Group()
         self.greenBullets = pygame.sprite.Group()
@@ -307,6 +309,7 @@ class App(object):
                 #prevent users from exiting the GAME OVER screen too quickly
                 if (pygame.time.get_ticks() - self.gameOverTime) > 2000:
                     self.gameOverInput()
+                    self.oof.play()
                 pygame.display.update()
             elif self.gameWin:
                 self.playIntroSound = True
