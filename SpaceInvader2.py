@@ -15,7 +15,7 @@ NEARBLACK = ( 19,  15,  48)
 PLAYERWIDTH = 40
 PLAYERHEIGHT = 10
 PLAYER1 = 'Player 1'
-PLAYERSPEED = 3
+PLAYERSPEED = 5
 PLAYERCOLOR = BLUE
 # display
 GAMETITLE = "Space Invaders"
@@ -146,9 +146,10 @@ class App(object):
         self.gameWin    = False
         self.beginGame  = False
         self.laserSound = pygame.mixer.Sound('laser.ogg')
-        self.startLaser = pygame.mixer.Sound('alienLaser.ogg')
+        self.start = pygame.mixer.Sound('m.ogg')
         self.oof        = pygame.mixer.Sound('oof.ogg')
         self.hurt       = pygame.mixer.Sound('hurt.ogg')
+        self.win        = pygame.mixer.Sound('apexwin.ogg')
         self.playIntroSound = True
     def resetGame(self):
         self.gameStart = True
@@ -179,7 +180,7 @@ class App(object):
         self.enemyBulletTimer = pygame.time.get_ticks()
         self.gameOverTime = pygame.time.get_ticks()
         if self.playIntroSound:
-            self.startLaser.play()
+            self.start.play()
             self.playIntroSound = False
     def checkForEnemyBullets(self):
         redBulletsGroup = pygame.sprite.Group()
@@ -281,6 +282,8 @@ class App(object):
         pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
     def checkGameWin(self):
         if len(self.enemies) == 0:
+            pygame.mixer.stop()
+            self.win.play()
             self.gameWin = True
             self.gameOver = False
             self.gameStart = False
@@ -289,6 +292,8 @@ class App(object):
         else:
             for enemy in self.enemies:
                 if enemy.rect.bottom > DISPLAYHEIGHT:
+                    pygame.mixer.stop()
+                    self.oof.play()
                     self.gameOver = True
                     self.gameStart = False
                     self.beginGame = False
@@ -309,7 +314,6 @@ class App(object):
             elif self.gameOver:
                 self.playIntroSound = True
                 self.displaySurf.fill(BACKGROUNDCOLOR)
-                self.oof.play()
                 self.gameOverMessage.draw(self.displaySurf)
                 #prevent users from exiting the GAME OVER screen too quickly
                 if (pygame.time.get_ticks() - self.gameOverTime) > 2000:
@@ -319,8 +323,9 @@ class App(object):
                 self.playIntroSound = True
                 self.displaySurf.fill(BACKGROUNDCOLOR)
                 self.gameWinMessage.draw(self.displaySurf)
-                if (pygame.time.get_ticks() - self.gameOverTime) > 3000:
+                if (pygame.time.get_ticks() - self.gameOverTime) > 21000:
                     self.gameOverInput()
+                    pygame.mixer.stop()
                 pygame.display.update()
             elif self.beginGame:
                 if self.needToMakeEnemies:
