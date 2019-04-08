@@ -15,7 +15,7 @@ NEARBLACK = ( 19,  15,  48)
 PLAYERWIDTH = 40
 PLAYERHEIGHT = 10
 PLAYER1 = 'Player 1'
-PLAYERSPEED = 5
+PLAYERSPEED = 2
 PLAYERCOLOR = BLUE
 # display
 GAMETITLE = "Space Invaders"
@@ -175,7 +175,7 @@ class App(object):
         self.allSprites = pygame.sprite.Group(self.player)
         self.keys = pygame.key.get_pressed()
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = 144
         self.enemyMoves = 0
         self.enemyBulletTimer = pygame.time.get_ticks()
         self.gameOverTime = pygame.time.get_ticks()
