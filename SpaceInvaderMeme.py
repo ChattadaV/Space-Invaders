@@ -318,6 +318,7 @@ class App(object):
                 #prevent users from exiting the GAME OVER screen too quickly
                 if (pygame.time.get_ticks() - self.gameOverTime) > 2000:
                     self.gameOverInput()
+                    pygame.mixer.stop()
                 pygame.display.update()
             elif self.gameWin:
                 self.playIntroSound = True
