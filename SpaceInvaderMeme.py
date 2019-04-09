@@ -13,30 +13,31 @@ PURPLE    = (200,   0, 255)
 NEARBLACK = ( 15,  15,  40)
 # player
 PLAYERWIDTH = 40
-PLAYERHEIGHT = 10
+PLAYERHEIGHT = 30
 PLAYER1 = 'Player 1'
 PLAYERSPEED = 3
-PLAYERCOLOR = BLUE
+PLAYERHP= 3
 # display
 GAMETITLE = "Space Invaders"
-DISPLAYWIDTH = 640
-DISPLAYHEIGHT = 480
+DISPLAYWIDTH  = 1280
+DISPLAYHEIGHT = 1000
 BACKGROUNDCOLOR = NEARBLACK
 XMARGIN = 50
 YMARGIN = 50
 # bullet
-BULLETSIZE = 5
-BULLETOFFSET = 700
+BULLETSIZE = 6
+BULLETOFFSET = 250
 # enemy
-ENEMYSIZE = 25
+ENEMYSIZE = 40
 ENEMYNAME = 'Enemy'
-ENEMYGAP = 20
-ARRAYWIDTH = 12
-ARRAYHEIGHT = 4
-MOVETIME = 1000
+ENEMYGAP = 30
+ARRAYWIDTH = 16
+ARRAYHEIGHT = 5
+MOVETIME = 1200
 MOVEX = 10
 MOVEY = ENEMYSIZE
 TIMEOFFSET = 300
+BULLETSPEED = 7
 # movement
 KEYSPRESSED = {pygame.K_LEFT  : (-1),
                pygame.K_RIGHT : ( 1)}
@@ -47,18 +48,28 @@ class Player(pygame.sprite.Sprite):
         self.width  = PLAYERWIDTH
         self.height = PLAYERHEIGHT
         self.image  = pygame.Surface((self.width, self.height))
-        self.color  = PLAYERCOLOR
-        self.image.fill(self.color)
+        self.hp  = PLAYERHP
+        self.image  = self.setImage()
         self.rect   = self.image.get_rect()
         self.name   = PLAYER1
         self.speed  = PLAYERSPEED
         self.vectorx= 0
+    def setImage(self):
+        if self.hp >= 3:
+            image = pygame.image.load('GalagaShip.png')
+        elif self.hp == 2:
+            image = pygame.image.load('GalagaShip2.png')
+        elif self.hp == 1:
+            image = pygame.image.load('GalagaShip1.png')
+        image.convert_alpha()
+        image = pygame.transform.scale(image, (self.width, self.height))
+        return image
     def update(self, keys, *args):
         for key in KEYSPRESSED:
             if keys[key]:
                 self.rect.x += KEYSPRESSED[key] * self.speed
         self.checkForSide()
-        self.image.fill(self.color)
+        self.image  = self.setImage()
     def checkForSide(self):
         if self.rect.right > DISPLAYWIDTH:
             self.rect.left = 0
@@ -66,6 +77,7 @@ class Player(pygame.sprite.Sprite):
         elif self.rect.left < 0:
             self.rect.right = DISPLAYWIDTH
             self.vectorx = 0
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, rect, color, vectory, speed):
         pygame.sprite.Sprite.__init__(self)
@@ -117,9 +129,9 @@ class Enemy(pygame.sprite.Sprite):
     def setImage(self):
         if self.row == 0:
             image = pygame.image.load('alien1.png')
-        elif self.row == 1:
+        elif self.row == 1 or self.row == 4:
             image = pygame.image.load('alien2.png')
-        elif self.row == 2:
+        elif self.row == 2 or self.row == 5:
             image = pygame.image.load('alien3.png')
         else:
             image = pygame.image.load('alien1.png')
@@ -189,20 +201,24 @@ class App(object):
                 redBulletsGroup.add(bullet)
         for bullet in redBulletsGroup:
             if pygame.sprite.collide_rect(bullet, self.player):
-                if self.player.color == BLUE:
-                    self.hurt.play()
-                    self.player.color = PURPLE
-                elif self.player.color == PURPLE:
-                    self.hurt.play()
-                    self.player.color = RED
-                elif self.player.color == RED:
+                if self.player.hp == 1:
                     self.hurt.play()
                     self.gameOver = True
                     self.gameOverTime = pygame.time.get_ticks()
+                else:
+                    self.hurt.play()
+                    self.player.hp -= 1
+
                 bullet.kill()
+    def checkForPlayerBullets(self):
+        greenBulletsGroup = pygame.sprite.Group()
+        for bullet in self.bullets:
+            if bullet.color == GREEN:
+                greenBulletsGroup.add(bullet)
+        pygame.sprite.groupcollide(greenBulletsGroup, self.enemies, True, True)
     def shootEnemyBullet(self, rect):
         if (pygame.time.get_ticks() - self.enemyBulletTimer) > BULLETOFFSET:
-            self.bullets.add(Bullet(rect, RED, 1, 5))
+            self.bullets.add(Bullet(rect, RED, 1, BULLETSPEED))
             self.allSprites.add(self.bullets)
             self.enemyBulletTimer = pygame.time.get_ticks()
     def findEnemyShooter(self):
@@ -234,7 +250,7 @@ class App(object):
         player = Player()
         ##Place the player centerx and five pixels from the bottom
         player.rect.centerx = self.displayRect.centerx
-        player.rect.bottom = self.displayRect.bottom - 5
+        player.rect.bottom = self.displayRect.bottom - 10
         return player
     def makeEnemies(self):
         enemies = pygame.sprite.Group()
@@ -250,15 +266,14 @@ class App(object):
             self.keys = pygame.key.get_pressed()
             if event.type == QUIT:
                 self.terminate()
-            elif event.type == KEYDOWN:
-                if event.key == K_SPACE and len(self.greenBullets) < 1:
-                    bullet = Bullet(self.player.rect, GREEN, -1, 20)
-                    self.greenBullets.add(bullet)
-                    self.bullets.add(self.greenBullets)
-                    self.allSprites.add(self.bullets)
-                    self.laserSound.play()
-                elif event.key == K_ESCAPE:
-                    self.terminate()
+            if self.keys[pygame.K_SPACE] and len(self.greenBullets) < 2:
+                bullet = Bullet(self.player.rect, GREEN, -1, 20)
+                self.greenBullets.add(bullet)
+                self.bullets.add(self.greenBullets)
+                self.allSprites.add(self.bullets)
+                self.laserSound.play()
+            elif event.key == K_ESCAPE:
+                self.terminate()
     def gameStartInput(self):
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -279,7 +294,7 @@ class App(object):
                 self.gameWin = False
     def checkCollisions(self):
         self.checkForEnemyBullets()
-        pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
+        self.checkForPlayerBullets()
     def checkGameWin(self):
         if len(self.enemies) == 0:
             pygame.mixer.stop()
