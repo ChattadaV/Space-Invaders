@@ -12,8 +12,8 @@ BLUE      = (  0,   0, 255)
 PURPLE    = (200,   0, 255)
 NEARBLACK = ( 15,  15,  40)
 # player
-PLAYERWIDTH = 40
-PLAYERHEIGHT = 30
+PLAYERWIDTH = 60
+PLAYERHEIGHT = 40
 PLAYER1 = 'Player 1'
 PLAYERSPEED = 3
 PLAYERHP= 3
@@ -27,6 +27,7 @@ YMARGIN = 50
 # bullet
 BULLETSIZE = 6
 BULLETOFFSET = 250
+BULLETSPEED = 7
 # enemy
 ENEMYSIZE = 40
 ENEMYNAME = 'Enemy'
@@ -37,7 +38,7 @@ MOVETIME = 1200
 MOVEX = 10
 MOVEY = ENEMYSIZE
 TIMEOFFSET = 300
-BULLETSPEED = 7
+
 # movement
 KEYSPRESSED = {pygame.K_LEFT  : (-1),
                pygame.K_RIGHT : ( 1)}
@@ -56,11 +57,11 @@ class Player(pygame.sprite.Sprite):
         self.vectorx= 0
     def setImage(self):
         if self.hp >= 3:
-            image = pygame.image.load('GalagaShip.png')
+            image = pygame.image.load('./assets/GalagaShip.png')
         elif self.hp == 2:
-            image = pygame.image.load('GalagaShip2.png')
+            image = pygame.image.load('./assets/GalagaShip2.png')
         elif self.hp == 1:
-            image = pygame.image.load('GalagaShip1.png')
+            image = pygame.image.load('./assets/GalagaShip1.png')
         image.convert_alpha()
         image = pygame.transform.scale(image, (self.width, self.height))
         return image
@@ -128,13 +129,13 @@ class Enemy(pygame.sprite.Sprite):
             self.timer = currentTime
     def setImage(self):
         if self.row == 0:
-            image = pygame.image.load('alien1.png')
+            image = pygame.image.load('./assets/alien1.png')
         elif self.row == 1 or self.row == 4:
-            image = pygame.image.load('alien2.png')
+            image = pygame.image.load('./assets/alien2.png')
         elif self.row == 2 or self.row == 5:
-            image = pygame.image.load('alien3.png')
+            image = pygame.image.load('./assets/alien3.png')
         else:
-            image = pygame.image.load('alien1.png')
+            image = pygame.image.load('./assets/alien1.png')
         image.convert_alpha()
         image = pygame.transform.scale(image, (self.width, self.height))
         return image
@@ -157,28 +158,28 @@ class App(object):
         self.gameOver   = False
         self.gameWin    = False
         self.beginGame  = False
-        self.laserSound = pygame.mixer.Sound('laser.ogg')
-        self.start = pygame.mixer.Sound('m.ogg')
-        self.oof        = pygame.mixer.Sound('oof.ogg')
-        self.hurt       = pygame.mixer.Sound('hurt.ogg')
-        self.win        = pygame.mixer.Sound('apexwin.ogg')
+        self.laserSound = pygame.mixer.Sound('./assets/laser.ogg')
+        self.start = pygame.mixer.Sound('./assets/m.ogg')
+        self.oof        = pygame.mixer.Sound('./assets/oof.ogg')
+        self.hurt       = pygame.mixer.Sound('./assets/hurt.ogg')
+        self.win        = pygame.mixer.Sound('./assets/apexwin.ogg')
         self.playIntroSound = True
     def resetGame(self):
         self.gameStart = True
         self.gameOver = False
         self.gameWin = False
         self.needToMakeEnemies = True
-        self.introMessage1 = Text('OpenSans.ttf', 60, 
+        self.introMessage1 = Text('./assets/OpenSans.ttf', 60, 
                                   'Space Invaders!',
                                   PURPLE, self.displayRect, self.displaySurf)
-        self.introMessage2 = Text('OpenSans.ttf', 16,
+        self.introMessage2 = Text('./assets/OpenSans.ttf', 16,
                                   '--- Press Any Key to Continue ---',
                                   GREEN, self.displayRect, self.displaySurf)
         self.introMessage2.rect.top = self.introMessage1.rect.bottom + 25
-        self.gameOverMessage = Text('OpenSans.ttf', 40,
+        self.gameOverMessage = Text('./assets/OpenSans.ttf', 40,
                                     'OOF',
                                     GREEN, self.displayRect, self.displaySurf)
-        self.gameWinMessage = Text('OpenSans.ttf', 40,
+        self.gameWinMessage = Text('./assets/OpenSans.ttf', 40,
                                     'YOU ARE THE CHAMPION',
                                     WHITE, self.displayRect, self.displaySurf)
         self.player = self.makePlayer()
